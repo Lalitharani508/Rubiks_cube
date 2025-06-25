@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubik's Cube Solver</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Rubik's Cube Solver</h1>
+        
+        <div class="controls">
+            <button id="scrambleBtn">Scramble</button>
+            <button id="solveBtn">Generate Solution</button>
+            <button id="nextBtn" disabled>Next Move</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="cube-container">
+            <div class="cube-display" id="cubeDisplay"></div>
+        </div>
+        
+        <div class="info">
+            <div class="progress-info">
+                <span>Progress: <span id="currentMove">0</span> / <span id="totalMoves">0</span></span>
+            </div>
+            <div class="current-step">
+                <span id="currentStep">Ready to start</span>
+            </div>
+        </div>
+        
+        <div class="current-move-display" id="currentMoveDisplay"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
