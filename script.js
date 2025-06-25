@@ -238,8 +238,8 @@ class RubiksCube {
     return true
   }
 
-  // Generate scramble moves (don't execute them)
-  generateScramble() {
+  // Generate and execute scramble moves
+  generateAndExecuteScramble() {
     const solutionLength = 15 + Math.floor(Math.random() * 6) // 15-20 moves
     const possibleMoves = ["R", "R'", "L", "L'", "U", "U'", "D", "D'", "F", "F'", "B", "B'"]
     const scrambleMoves = []
@@ -251,9 +251,13 @@ class RubiksCube {
       } while (scrambleMoves.length > 0 && this.isOppositeMove(move, scrambleMoves[scrambleMoves.length - 1]))
 
       scrambleMoves.push(move)
+      this.executeMove(move)
     }
 
-    return scrambleMoves
+    // Generate solution (reverse of scramble)
+    const solution = this.reverseMoves(scrambleMoves)
+
+    return { scrambleMoves, solution }
   }
 
   // Check if two moves are opposites
@@ -312,7 +316,6 @@ class CubeUI {
     this.isAnimating = false
     this.scrambleCount = 0
     this.maxScrambles = 5
-    this.currentScramble = []
     this.generatedScrambles = []
     this.initializeElements()
     this.bindEvents()
@@ -322,13 +325,10 @@ class CubeUI {
   initializeElements() {
     this.cubeDisplay = document.getElementById("cubeDisplay")
     this.scrambleBtn = document.getElementById("scrambleBtn")
-    this.executeBtn = document.getElementById("executeBtn")
     this.solveBtn = document.getElementById("solveBtn")
     this.nextBtn = document.getElementById("nextBtn")
     this.resetBtn = document.getElementById("resetBtn")
     this.scrambleCountSpan = document.getElementById("scrambleCount")
-    this.currentMove = document.getElementById("currentMove")
-    this.totalMoves = document.getElementById("totalMoves")
     this.currentStep = document.getElementById("currentStep")
     this.scrambleDisplay = document.getElementById("scrambleDisplay")
     this.currentMoveDisplay = document.getElementById("currentMoveDisplay")
@@ -336,7 +336,6 @@ class CubeUI {
 
   bindEvents() {
     this.scrambleBtn.addEventListener("click", () => this.generateScramble())
-    this.executeBtn.addEventListener("click", () => this.executeScramble())
     this.solveBtn.addEventListener("click", () => this.generateSolution())
     this.nextBtn.addEventListener("click", () => this.executeNextMove())
     this.resetBtn.addEventListener("click", () => this.reset())
@@ -384,58 +383,44 @@ class CubeUI {
       }
     }
 
-    // Update progress
-    this.currentMove.textContent = this.currentMoveIndex
-    this.totalMoves.textContent = this.solution.length
+    // Update scramble count
     this.scrambleCountSpan.textContent = this.scrambleCount
   }
 
   generateScramble() {
     if (this.isAnimating || this.scrambleCount >= this.maxScrambles) return
 
+    this.isAnimating = true
     this.scrambleCount++
-    this.currentScramble = this.cube.generateScramble()
-    this.generatedScrambles.push([...this.currentScramble])
+
+    this.currentStep.textContent = "Generating and executing scramble..."
+
+    // Generate and execute scramble, get solution
+    const { scrambleMoves, solution } = this.cube.generateAndExecuteScramble()
+    this.solution = solution
+    this.currentMoveIndex = 0
+    this.generatedScrambles.push(scrambleMoves)
 
     // Update UI
     this.scrambleDisplay.innerHTML = `
       <div class="scramble-info">
-        Scramble ${this.scrambleCount} Generated (${this.currentScramble.length} moves)
-        <div class="scramble-moves">${this.currentScramble.join(" ")}</div>
+        Scramble ${this.scrambleCount} Applied (${scrambleMoves.length} moves)
+        <div class="scramble-moves">${scrambleMoves.join(" ")}</div>
       </div>
     `
-
-    this.currentStep.textContent = `Scramble ${this.scrambleCount} generated. Click 'Execute Scramble' to apply it.`
-    this.executeBtn.disabled = false
-
-    // Update scramble button
-    if (this.scrambleCount >= this.maxScrambles) {
-      this.scrambleBtn.disabled = true
-      this.scrambleBtn.textContent = "Max Scrambles Reached (5/5)"
-    }
-
-    this.render()
-  }
-
-  executeScramble() {
-    if (this.isAnimating || this.currentScramble.length === 0) return
-
-    this.isAnimating = true
-    this.currentStep.textContent = "Executing scramble..."
-
-    // Execute the scramble moves
-    this.cube.executeMoves(this.currentScramble)
-
-    // Generate solution (reverse of scramble)
-    this.solution = this.cube.reverseMoves(this.currentScramble)
-    this.currentMoveIndex = 0
 
     this.render()
 
     setTimeout(() => {
-      this.currentStep.textContent = `Scramble executed! Cube is now scrambled. Click 'Generate Solution' to solve.`
-      this.executeBtn.disabled = true
+      this.currentStep.textContent = `Scramble ${this.scrambleCount} applied! Cube is now scrambled. Click 'Generate Solution' to solve.`
       this.solveBtn.disabled = false
+
+      // Update scramble button
+      if (this.scrambleCount >= this.maxScrambles) {
+        this.scrambleBtn.disabled = true
+        this.scrambleBtn.textContent = "Max Scrambles Reached (5/5)"
+      }
+
       this.isAnimating = false
     }, 500)
   }
@@ -510,7 +495,6 @@ class CubeUI {
     this.solution = []
     this.currentMoveIndex = 0
     this.scrambleCount = 0
-    this.currentScramble = []
     this.generatedScrambles = []
 
     // Reset UI
@@ -522,7 +506,6 @@ class CubeUI {
     // Reset buttons
     this.scrambleBtn.disabled = false
     this.scrambleBtn.textContent = "Generate Scramble (0/5)"
-    this.executeBtn.disabled = true
     this.solveBtn.disabled = true
     this.nextBtn.disabled = true
   }
