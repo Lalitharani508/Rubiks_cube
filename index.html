@@ -11,24 +11,28 @@
         <h1>Rubik's Cube Solver</h1>
         
         <div class="controls">
-            <button id="scrambleBtn">Generate Scramble (<span id="scrambleCount">0</span>/5)</button>
-            <button id="solveBtn" disabled>Generate Solution</button>
-            <button id="nextBtn" disabled>Next Move</button>
-            <button id="resetBtn">Reset</button>
+            <button id="generateBtn">Generate Scrambles</button>
+            <button id="resetBtn">Reset All</button>
+        </div>
+        
+        <div class="scramble-selector" id="scrambleSelector" style="display: none;">
+            <h3>Select Scramble to Solve:</h3>
+            <div class="scramble-buttons" id="scrambleButtons"></div>
         </div>
         
         <div class="cube-container">
-            <div class="cube-display" id="cubeDisplay"></div>
+            <div class="cube" id="cube"></div>
+        </div>
+        
+        <div class="move-controls">
+            <button id="prevBtn" disabled>Previous</button>
+            <button id="nextBtn" disabled>Next</button>
         </div>
         
         <div class="info">
-            <div class="current-step">
-                <span id="currentStep">Ready to start</span>
-            </div>
+            <div id="status">Click "Generate Scrambles" to start</div>
+            <div id="moveInfo"></div>
         </div>
-        
-        <div class="scramble-display" id="scrambleDisplay"></div>
-        <div class="current-move-display" id="currentMoveDisplay"></div>
     </div>
     
     <script src="script.js"></script>

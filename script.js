@@ -1,44 +1,56 @@
+// Simple Rubik's Cube Class
 class RubiksCube {
   constructor() {
     this.faces = {
-      top: Array(9).fill(0), // White
-      bottom: Array(9).fill(1), // Yellow
-      front: Array(9).fill(2), // Red
-      back: Array(9).fill(3), // Orange
-      right: Array(9).fill(4), // Blue
-      left: Array(9).fill(5), // Green
+      top: [0, 0, 0, 0, 0, 0, 0, 0, 0], // white
+      bottom: [1, 1, 1, 1, 1, 1, 1, 1, 1], // yellow
+      front: [2, 2, 2, 2, 2, 2, 2, 2, 2], // red
+      back: [3, 3, 3, 3, 3, 3, 3, 3, 3], // orange
+      right: [4, 4, 4, 4, 4, 4, 4, 4, 4], // blue
+      left: [5, 5, 5, 5, 5, 5, 5, 5, 5], // green
     }
-
     this.colors = ["white", "yellow", "red", "orange", "blue", "green"]
-    this.moveHistory = []
   }
 
-  // Clone the cube state
-  clone() {
-    const newCube = new RubiksCube()
-    for (const face in this.faces) {
-      newCube.faces[face] = [...this.faces[face]]
+  // Save current state
+  saveState() {
+    return {
+      top: [...this.faces.top],
+      bottom: [...this.faces.bottom],
+      front: [...this.faces.front],
+      back: [...this.faces.back],
+      right: [...this.faces.right],
+      left: [...this.faces.left],
     }
-    newCube.moveHistory = [...this.moveHistory]
-    return newCube
   }
 
-  // Rotate a face 90 degrees clockwise
+  // Restore state
+  restoreState(state) {
+    this.faces.top = [...state.top]
+    this.faces.bottom = [...state.bottom]
+    this.faces.front = [...state.front]
+    this.faces.back = [...state.back]
+    this.faces.right = [...state.right]
+    this.faces.left = [...state.left]
+  }
+
+  // Rotate face clockwise
   rotateFace(face) {
-    const temp = [...this.faces[face]]
-    this.faces[face][0] = temp[6]
-    this.faces[face][1] = temp[3]
-    this.faces[face][2] = temp[0]
-    this.faces[face][3] = temp[7]
-    this.faces[face][4] = temp[4]
-    this.faces[face][5] = temp[1]
-    this.faces[face][6] = temp[8]
-    this.faces[face][7] = temp[5]
-    this.faces[face][8] = temp[2]
+    const f = this.faces[face]
+    const temp = [...f]
+    f[0] = temp[6]
+    f[1] = temp[3]
+    f[2] = temp[0]
+    f[3] = temp[7]
+    f[4] = temp[4]
+    f[5] = temp[1]
+    f[6] = temp[8]
+    f[7] = temp[5]
+    f[8] = temp[2]
   }
 
-  // All cube rotations
-  rotateR() {
+  // Basic moves
+  R() {
     this.rotateFace("right")
     const temp = [this.faces.top[2], this.faces.top[5], this.faces.top[8]]
     this.faces.top[2] = this.faces.front[2]
@@ -55,13 +67,7 @@ class RubiksCube {
     this.faces.back[0] = temp[2]
   }
 
-  rotateRPrime() {
-    this.rotateR()
-    this.rotateR()
-    this.rotateR()
-  }
-
-  rotateL() {
+  L() {
     this.rotateFace("left")
     const temp = [this.faces.top[0], this.faces.top[3], this.faces.top[6]]
     this.faces.top[0] = this.faces.back[8]
@@ -78,13 +84,7 @@ class RubiksCube {
     this.faces.front[6] = temp[2]
   }
 
-  rotateLPrime() {
-    this.rotateL()
-    this.rotateL()
-    this.rotateL()
-  }
-
-  rotateU() {
+  U() {
     this.rotateFace("top")
     const temp = [this.faces.front[0], this.faces.front[1], this.faces.front[2]]
     this.faces.front[0] = this.faces.right[0]
@@ -101,13 +101,7 @@ class RubiksCube {
     this.faces.left[2] = temp[2]
   }
 
-  rotateUPrime() {
-    this.rotateU()
-    this.rotateU()
-    this.rotateU()
-  }
-
-  rotateD() {
+  D() {
     this.rotateFace("bottom")
     const temp = [this.faces.front[6], this.faces.front[7], this.faces.front[8]]
     this.faces.front[6] = this.faces.left[6]
@@ -124,13 +118,7 @@ class RubiksCube {
     this.faces.right[8] = temp[2]
   }
 
-  rotateDPrime() {
-    this.rotateD()
-    this.rotateD()
-    this.rotateD()
-  }
-
-  rotateF() {
+  F() {
     this.rotateFace("front")
     const temp = [this.faces.top[6], this.faces.top[7], this.faces.top[8]]
     this.faces.top[6] = this.faces.left[8]
@@ -147,13 +135,7 @@ class RubiksCube {
     this.faces.right[6] = temp[2]
   }
 
-  rotateFPrime() {
-    this.rotateF()
-    this.rotateF()
-    this.rotateF()
-  }
-
-  rotateB() {
+  B() {
     this.rotateFace("back")
     const temp = [this.faces.top[0], this.faces.top[1], this.faces.top[2]]
     this.faces.top[0] = this.faces.right[2]
@@ -170,98 +152,77 @@ class RubiksCube {
     this.faces.left[0] = temp[2]
   }
 
-  rotateBPrime() {
-    this.rotateB()
-    this.rotateB()
-    this.rotateB()
-  }
-
-  // Execute a move by string
+  // Execute move by string
   executeMove(move) {
     switch (move) {
       case "R":
-        this.rotateR()
+        this.R()
         break
       case "R'":
-        this.rotateRPrime()
+        this.R()
+        this.R()
+        this.R()
         break
       case "L":
-        this.rotateL()
+        this.L()
         break
       case "L'":
-        this.rotateLPrime()
+        this.L()
+        this.L()
+        this.L()
         break
       case "U":
-        this.rotateU()
+        this.U()
         break
       case "U'":
-        this.rotateUPrime()
+        this.U()
+        this.U()
+        this.U()
         break
       case "D":
-        this.rotateD()
+        this.D()
         break
       case "D'":
-        this.rotateDPrime()
+        this.D()
+        this.D()
+        this.D()
         break
       case "F":
-        this.rotateF()
+        this.F()
         break
       case "F'":
-        this.rotateFPrime()
+        this.F()
+        this.F()
+        this.F()
         break
       case "B":
-        this.rotateB()
+        this.B()
         break
       case "B'":
-        this.rotateBPrime()
+        this.B()
+        this.B()
+        this.B()
         break
     }
-    this.moveHistory.push(move)
   }
 
-  // Execute multiple moves
-  executeMoves(moves) {
-    for (const move of moves) {
-      this.executeMove(move)
-    }
-  }
-
-  // Check if cube is solved
-  isSolved() {
-    for (const face in this.faces) {
-      const faceColors = this.faces[face]
-      const firstColor = faceColors[0]
-      if (!faceColors.every((color) => color === firstColor)) {
-        return false
-      }
-    }
-    return true
-  }
-
-  // Generate and execute scramble moves
-  generateAndExecuteScramble() {
-    const solutionLength = 15 + Math.floor(Math.random() * 6) // 15-20 moves
-    const possibleMoves = ["R", "R'", "L", "L'", "U", "U'", "D", "D'", "F", "F'", "B", "B'"]
-    const scrambleMoves = []
-
-    for (let i = 0; i < solutionLength; i++) {
+  // Generate scramble
+  generateScramble() {
+    const moves = ["R", "R'", "L", "L'", "U", "U'", "D", "D'", "F", "F'", "B", "B'"]
+    const scramble = []
+    for (let i = 0; i < 15 + Math.floor(Math.random() * 6); i++) {
       let move
       do {
-        move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
-      } while (scrambleMoves.length > 0 && this.isOppositeMove(move, scrambleMoves[scrambleMoves.length - 1]))
-
-      scrambleMoves.push(move)
+        move = moves[Math.floor(Math.random() * moves.length)]
+      } while (scramble.length > 0 && this.isOpposite(move, scramble[scramble.length - 1]))
+      scramble.push(move)
       this.executeMove(move)
     }
-
-    // Generate solution (reverse of scramble)
-    const solution = this.reverseMoves(scrambleMoves)
-
-    return { scrambleMoves, solution }
+    return scramble
   }
 
-  // Check if two moves are opposites
-  isOppositeMove(move1, move2) {
+  // Check if moves are opposite
+  isOpposite(move1, move2) {
     const opposites = {
       R: "R'",
       "R'": "R",
@@ -279,31 +240,30 @@ class RubiksCube {
     return opposites[move1] === move2
   }
 
-  // Reverse a sequence of moves
-  reverseMoves(moves) {
-    const reversed = []
-    for (let i = moves.length - 1; i >= 0; i--) {
-      const move = moves[i]
+  // Get reverse moves for solution
+  getSolution(scramble) {
+    const solution = []
+    for (let i = scramble.length - 1; i >= 0; i--) {
+      const move = scramble[i]
       if (move.includes("'")) {
-        reversed.push(move.replace("'", ""))
+        solution.push(move.replace("'", ""))
       } else {
-        reversed.push(move + "'")
+        solution.push(move + "'")
       }
     }
-    return reversed
+    return solution
   }
 
-  // Reset to solved state
+  // Reset cube
   reset() {
     this.faces = {
-      top: Array(9).fill(0),
-      bottom: Array(9).fill(1),
-      front: Array(9).fill(2),
-      back: Array(9).fill(3),
-      right: Array(9).fill(4),
-      left: Array(9).fill(5),
+      top: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      bottom: [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      front: [2, 2, 2, 2, 2, 2, 2, 2, 2],
+      back: [3, 3, 3, 3, 3, 3, 3, 3, 3],
+      right: [4, 4, 4, 4, 4, 4, 4, 4, 4],
+      left: [5, 5, 5, 5, 5, 5, 5, 5, 5],
     }
-    this.moveHistory = []
   }
 }
 
@@ -311,40 +271,41 @@ class RubiksCube {
 class CubeUI {
   constructor() {
     this.cube = new RubiksCube()
-    this.solution = []
-    this.currentMoveIndex = 0
-    this.isAnimating = false
-    this.scrambleCount = 0
-    this.maxScrambles = 5
-    this.generatedScrambles = []
-    this.initializeElements()
+    this.scrambles = []
+    this.solutions = []
+    this.scrambleStates = []
+    this.solutionStates = []
+    this.solvedScrambles = new Set()
+    this.currentScrambleIndex = -1
+    this.currentMoveIndex = -1
+
+    this.initElements()
     this.bindEvents()
     this.render()
   }
 
-  initializeElements() {
-    this.cubeDisplay = document.getElementById("cubeDisplay")
-    this.scrambleBtn = document.getElementById("scrambleBtn")
-    this.solveBtn = document.getElementById("solveBtn")
-    this.nextBtn = document.getElementById("nextBtn")
+  initElements() {
+    this.cubeElement = document.getElementById("cube")
+    this.generateBtn = document.getElementById("generateBtn")
     this.resetBtn = document.getElementById("resetBtn")
-    this.scrambleCountSpan = document.getElementById("scrambleCount")
-    this.currentStep = document.getElementById("currentStep")
-    this.scrambleDisplay = document.getElementById("scrambleDisplay")
-    this.currentMoveDisplay = document.getElementById("currentMoveDisplay")
+    this.prevBtn = document.getElementById("prevBtn")
+    this.nextBtn = document.getElementById("nextBtn")
+    this.status = document.getElementById("status")
+    this.moveInfo = document.getElementById("moveInfo")
+    this.scrambleSelector = document.getElementById("scrambleSelector")
+    this.scrambleButtons = document.getElementById("scrambleButtons")
   }
 
   bindEvents() {
-    this.scrambleBtn.addEventListener("click", () => this.generateScramble())
-    this.solveBtn.addEventListener("click", () => this.generateSolution())
-    this.nextBtn.addEventListener("click", () => this.executeNextMove())
+    this.generateBtn.addEventListener("click", () => this.generateAllScrambles())
     this.resetBtn.addEventListener("click", () => this.reset())
+    this.prevBtn.addEventListener("click", () => this.previousMove())
+    this.nextBtn.addEventListener("click", () => this.nextMove())
   }
 
   render() {
-    this.cubeDisplay.innerHTML = ""
+    this.cubeElement.innerHTML = ""
 
-    // Create cube layout (unfolded)
     const layout = [
       ["empty", "empty", "empty", "top", "top", "top", "empty", "empty", "empty", "empty", "empty", "empty"],
       ["empty", "empty", "empty", "top", "top", "top", "empty", "empty", "empty", "empty", "empty", "empty"],
@@ -357,14 +318,7 @@ class CubeUI {
       ["empty", "empty", "empty", "bottom", "bottom", "bottom", "empty", "empty", "empty", "empty", "empty", "empty"],
     ]
 
-    const faceCounters = {
-      top: 0,
-      left: 0,
-      front: 0,
-      right: 0,
-      back: 0,
-      bottom: 0,
-    }
+    const faceCounters = { top: 0, left: 0, front: 0, right: 0, back: 0, bottom: 0 }
 
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 12; col++) {
@@ -379,139 +333,205 @@ class CubeUI {
           faceCounters[faceType]++
         }
 
-        this.cubeDisplay.appendChild(cell)
+        this.cubeElement.appendChild(cell)
       }
     }
-
-    // Update scramble count
-    this.scrambleCountSpan.textContent = this.scrambleCount
   }
 
-  generateScramble() {
-    if (this.isAnimating || this.scrambleCount >= this.maxScrambles) return
+  generateAllScrambles() {
+    this.scrambles = []
+    this.solutions = []
+    this.scrambleStates = []
+    this.solutionStates = []
+    this.solvedScrambles.clear()
+    this.currentScrambleIndex = -1
+    this.currentMoveIndex = -1
 
-    this.isAnimating = true
-    this.scrambleCount++
+    // Generate 5 scrambles
+    for (let i = 0; i < 5; i++) {
+      // Reset cube to solved state
+      this.cube.reset()
 
-    this.currentStep.textContent = "Generating and executing scramble..."
+      // Generate scramble
+      const scrambleMoves = this.cube.generateScramble()
+      const scrambledState = this.cube.saveState()
+      const solution = this.cube.getSolution(scrambleMoves)
 
-    // Generate and execute scramble, get solution
-    const { scrambleMoves, solution } = this.cube.generateAndExecuteScramble()
-    this.solution = solution
-    this.currentMoveIndex = 0
-    this.generatedScrambles.push(scrambleMoves)
+      // Generate all solution states
+      const solutionStatesList = [scrambledState]
+      this.cube.restoreState(scrambledState)
 
-    // Update UI
-    this.scrambleDisplay.innerHTML = `
-      <div class="scramble-info">
-        Scramble ${this.scrambleCount} Applied (${scrambleMoves.length} moves)
-        <div class="scramble-moves">${scrambleMoves.join(" ")}</div>
-      </div>
-    `
-
-    this.render()
-
-    setTimeout(() => {
-      this.currentStep.textContent = `Scramble ${this.scrambleCount} applied! Cube is now scrambled. Click 'Generate Solution' to solve.`
-      this.solveBtn.disabled = false
-
-      // Update scramble button
-      if (this.scrambleCount >= this.maxScrambles) {
-        this.scrambleBtn.disabled = true
-        this.scrambleBtn.textContent = "Max Scrambles Reached (5/5)"
+      for (const move of solution) {
+        this.cube.executeMove(move)
+        solutionStatesList.push(this.cube.saveState())
       }
 
-      this.isAnimating = false
-    }, 500)
+      this.scrambles.push(scrambleMoves)
+      this.solutions.push(solution)
+      this.scrambleStates.push(scrambledState)
+      this.solutionStates.push(solutionStatesList)
+    }
+
+    this.createScrambleButtons()
+    this.scrambleSelector.style.display = "block"
+    this.generateBtn.disabled = true
+    this.updateDisplay()
   }
 
-  generateSolution() {
-    if (this.isAnimating) return
-    if (this.cube.isSolved()) {
-      this.currentStep.textContent = "Cube is already solved!"
+  createScrambleButtons() {
+    this.scrambleButtons.innerHTML = ""
+
+    for (let i = 0; i < 5; i++) {
+      const button = document.createElement("button")
+      button.className = "scramble-btn"
+      button.textContent = `Scramble ${i + 1}`
+      button.addEventListener("click", () => this.selectScramble(i))
+      this.scrambleButtons.appendChild(button)
+    }
+  }
+
+  selectScramble(index) {
+    this.currentScrambleIndex = index
+    this.currentMoveIndex = -1
+
+    // Set cube to scrambled state
+    this.cube.restoreState(this.scrambleStates[index])
+    this.render()
+    this.updateScrambleButtons()
+    this.updateDisplay()
+    this.updateButtons()
+  }
+
+  updateScrambleButtons() {
+    const buttons = this.scrambleButtons.querySelectorAll(".scramble-btn")
+    buttons.forEach((button, index) => {
+      button.classList.remove("active", "solved")
+      if (index === this.currentScrambleIndex) {
+        button.classList.add("active")
+      }
+      if (this.solvedScrambles.has(index)) {
+        button.classList.add("solved")
+      }
+    })
+  }
+
+  nextMove() {
+    if (this.currentScrambleIndex === -1) return
+    const solution = this.solutions[this.currentScrambleIndex]
+    const solutionStates = this.solutionStates[this.currentScrambleIndex]
+
+    if (this.currentMoveIndex < solution.length - 1) {
+      this.currentMoveIndex++
+      this.cube.restoreState(solutionStates[this.currentMoveIndex + 1])
+      this.render()
+      this.updateDisplay()
+      this.updateButtons()
+
+      // Check if scramble is completely solved
+      if (this.currentMoveIndex === solution.length - 1) {
+        this.solvedScrambles.add(this.currentScrambleIndex)
+        this.updateScrambleButtons()
+        this.checkAllCompleted()
+      }
+    }
+  }
+
+  previousMove() {
+    if (this.currentScrambleIndex === -1) return
+    const solutionStates = this.solutionStates[this.currentScrambleIndex]
+
+    if (this.currentMoveIndex >= 0) {
+      this.currentMoveIndex--
+      this.cube.restoreState(solutionStates[this.currentMoveIndex + 1])
+      this.render()
+      this.updateDisplay()
+      this.updateButtons()
+
+      // Remove from solved if we go back
+      if (this.currentMoveIndex < this.solutions[this.currentScrambleIndex].length - 1) {
+        this.solvedScrambles.delete(this.currentScrambleIndex)
+        this.updateScrambleButtons()
+      }
+    }
+  }
+
+  updateButtons() {
+    if (this.currentScrambleIndex === -1) {
+      this.prevBtn.disabled = true
+      this.nextBtn.disabled = true
       return
     }
 
-    this.currentStep.textContent = `Solution ready! ${this.solution.length} moves to solve. Click 'Next Move' to start.`
-    this.nextBtn.disabled = false
-
-    this.currentMoveDisplay.innerHTML = `
-      <div class="move-info">
-        Solution generated: ${this.solution.length} moves
-        <br>
-        <small>Click 'Next Move' to execute step by step</small>
-      </div>
-    `
-
-    this.render()
+    const solution = this.solutions[this.currentScrambleIndex]
+    this.prevBtn.disabled = this.currentMoveIndex < 0
+    this.nextBtn.disabled = this.currentMoveIndex >= solution.length - 1
   }
 
-  async executeNextMove() {
-    if (this.isAnimating || this.currentMoveIndex >= this.solution.length) return
-
-    this.isAnimating = true
-
-    const move = this.solution[this.currentMoveIndex]
-    this.cube.executeMove(move)
-    this.currentMoveIndex++
-
-    // Update display
-    this.currentMoveDisplay.innerHTML = `
-      <div class="move-info">
-        Move ${this.currentMoveIndex}: ${move}
-      </div>
-    `
-
-    this.render()
-
-    // Check if solved
-    if (this.currentMoveIndex >= this.solution.length) {
-      setTimeout(() => {
-        if (this.cube.isSolved()) {
-          this.currentStep.textContent = "🎉 Cube solved successfully!"
-          this.currentMoveDisplay.innerHTML = `
-            <div class="solved-message">
-              ✅ Solved in ${this.solution.length} moves!
-            </div>
-          `
-        } else {
-          this.currentStep.textContent = "Solution completed, but cube not fully solved."
-        }
-        this.nextBtn.disabled = true
-        this.isAnimating = false
-      }, 300)
-    } else {
-      this.currentStep.textContent = `Move ${this.currentMoveIndex} of ${this.solution.length} completed. Click 'Next Move' to continue.`
-      setTimeout(() => {
-        this.isAnimating = false
-      }, 300)
+  updateDisplay() {
+    if (this.scrambles.length === 0) {
+      this.status.textContent = 'Click "Generate 5 Scrambles" to start'
+      this.moveInfo.innerHTML = ""
+      return
     }
+
+    if (this.currentScrambleIndex === -1) {
+      this.status.textContent = "Select a scramble to solve"
+      this.moveInfo.innerHTML = `
+        <div>5 scrambles generated! Click any scramble button above to start solving.</div>
+      `
+      return
+    }
+
+    const scramble = this.scrambles[this.currentScrambleIndex]
+    const solution = this.solutions[this.currentScrambleIndex]
+    const isCompleted = this.solvedScrambles.has(this.currentScrambleIndex)
+
+    this.status.textContent = `Solving Scramble ${this.currentScrambleIndex + 1} ${isCompleted ? "(Completed ✓)" : ""}`
+
+    let infoHTML = `
+      <div class="scramble-moves">
+        <strong>Scramble ${this.currentScrambleIndex + 1}:</strong> ${scramble.join(" ")}
+      </div>
+    `
+
+   
+
+    const currentMove = this.currentMoveIndex >= 0 ? solution[this.currentMoveIndex] : "Start"
+    const nextMove = this.currentMoveIndex < solution.length - 1 ? solution[this.currentMoveIndex + 1] : "Complete"
+
+    infoHTML += `
+      <div class="solution-progress">
+        <strong>Progress:</strong> ${this.currentMoveIndex + 1} / ${solution.length} moves<br>
+        <strong>Last Move:</strong> ${currentMove} | <strong>Next Move:</strong> ${nextMove}
+      </div>
+    `
+
+    this.moveInfo.innerHTML = infoHTML
   }
+
+ 
 
   reset() {
-    if (this.isAnimating) return
-
     this.cube.reset()
-    this.solution = []
-    this.currentMoveIndex = 0
-    this.scrambleCount = 0
-    this.generatedScrambles = []
+    this.scrambles = []
+    this.solutions = []
+    this.scrambleStates = []
+    this.solutionStates = []
+    this.solvedScrambles.clear()
+    this.currentScrambleIndex = -1
+    this.currentMoveIndex = -1
 
-    // Reset UI
     this.render()
-    this.currentStep.textContent = "Reset to solved state"
-    this.scrambleDisplay.innerHTML = ""
-    this.currentMoveDisplay.innerHTML = ""
-
-    // Reset buttons
-    this.scrambleBtn.disabled = false
-    this.scrambleBtn.textContent = "Generate Scramble (0/5)"
-    this.solveBtn.disabled = true
-    this.nextBtn.disabled = true
+    this.scrambleSelector.style.display = "none"
+    this.generateBtn.disabled = false
+    this.status.textContent = 'Click "Generate 5 Scrambles" to start'
+    this.moveInfo.innerHTML = ""
+    this.updateButtons()
   }
 }
 
-// Initialize the application
+// Start the application
 document.addEventListener("DOMContentLoaded", () => {
   new CubeUI()
 })
+
