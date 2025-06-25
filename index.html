@@ -11,8 +11,9 @@
         <h1>Rubik's Cube Solver</h1>
         
         <div class="controls">
-            <button id="scrambleBtn">Scramble</button>
-            <button id="solveBtn">Generate Solution</button>
+            <button id="scrambleBtn">Generate Scramble (<span id="scrambleCount">0</span>/5)</button>
+            <button id="executeBtn" disabled>Execute Scramble</button>
+            <button id="solveBtn" disabled>Generate Solution</button>
             <button id="nextBtn" disabled>Next Move</button>
             <button id="resetBtn">Reset</button>
         </div>
@@ -30,6 +31,7 @@
             </div>
         </div>
         
+        <div class="scramble-display" id="scrambleDisplay"></div>
         <div class="current-move-display" id="currentMoveDisplay"></div>
     </div>
     
